@@ -1,8 +1,12 @@
+<<<<<<< HEAD
 # Thanh-Trung Tran Portfolio cypress 
 This repository demonstrates a **pragmatic and maintainable approach to web test automation** using **Cypress**.
+=======
+# portfolio-cypress from Thanh-Trung Tran
+This repository demonstrates a maintainable approach to web test automation using Cypress.
+>>>>>>> 7167b8c (gitlab-ci added)
 
 ## Overview
-The focus is **not** on covering everything, but on:
 - stability
 - readability
 - maintainability
@@ -19,20 +23,6 @@ The focus is **not** on covering everything, but on:
 - **Cypress**
 - JavaScript / TypeScript
 - Node.js
-- (Optional) CI/CD: GitHub Actions / GitLab CI
-
----
+- GitLab CI
 
 ## Test Scope & Strategy
-
-### What is covered
-- Critical user flows (e.g. login, core business paths)
-- Happy paths and selected negative cases
-- UI tests focused on business value
-
-### What is intentionally NOT covered
-- Every UI detail
-- Purely technical edge cases better suited for unit tests
-- Unstable flows with no business relevance
-
-> The goal is **confidence**, not maximum test count.

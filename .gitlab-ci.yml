@@ -1,0 +1,15 @@
+stages:
+  - test
+
+cypress-e2e:
+  image: cypress/base:18
+  stage: test
+  before_script:
+    - npm ci
+  script:
+    - npx cypress run --browser chrome --headless
+  artifacts:
+    when: always
+    paths:
+      - cypress/screenshots
+      - cypress/videos
