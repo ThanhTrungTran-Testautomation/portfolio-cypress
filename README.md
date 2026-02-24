@@ -1,10 +1,5 @@
-<<<<<<< HEAD
-# Thanh-Trung Tran Portfolio cypress 
-This repository demonstrates a **pragmatic and maintainable approach to web test automation** using **Cypress**.
-=======
-# portfolio-cypress from Thanh-Trung Tran
+# Thanh-Trung Tran portfolio-cypress
 This repository demonstrates a maintainable approach to web test automation using Cypress.
->>>>>>> 7167b8c (gitlab-ci added)
 
 ## Overview
 - stability
