@@ -1,4 +1,4 @@
 {
-  "username": "portfolio_user",
+  "username": "admin-user",
   "password": "Password123!"
 }
