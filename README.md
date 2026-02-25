@@ -1,10 +1,8 @@
-# Cypress End-to-End Test Automation
-**Portfolio von Thanh Trung Tran**
+# Cypress End-to-End Test Automation Portfolio
+Autor: Thanh-Trung Tran
 
-## Portfolio
-
-Dieses Projekt zeigt eine modulare, skalierbare Architektur für End-to-End-Testautomatisierung mit Cypress.  
-Die Tests sind containerisiert (Docker), CI/CD-integriert (GitLab CI) und für eine cloudbasierte Ausführung in Kubernetes-Clustern ausgelegt.
+Dieses Portfolio demonstriert eine modulare und skalierbare Architektur für End-to-End-Testautomatisierung mit Cypress.  
+Die Tests sind containerisiert (Docker), CI/CD-integriert (GitLab CI) und für die Ausführung in cloudbasierten Kubernetes-Clustern vorbereitet.
 
 ## Architektur
 - Page Object Model (POM): Strukturierung der UI-Interaktionen in wiederverwendbare Seitenobjekte zur Kapselung von Selektoren und Aktionen sowie zur Verbesserung von Wartbarkeit und Lesbarkeit
