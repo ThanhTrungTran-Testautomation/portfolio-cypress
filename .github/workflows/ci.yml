@@ -12,33 +12,27 @@ jobs:
   cypress-run:
     runs-on: ubuntu-latest
 
+    container:
+      image: cypress/browsers:node20.2.0-chrome114-ff112
+
     steps:
       # 1 Repository auschecken
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2 Node.js Setup
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      # 3 Abhängigkeiten installieren
+      # 2 Abhängigkeiten installieren
       - name: Install dependencies
         run: npm ci
 
-      # 4 Cypress ausführbar machen (sicherheitshalber)
-      - name: Make Cypress executable
-        run: chmod +x ./node_modules/.bin/cypress
-
+      # 3 Cypress Installation prüfen (optional, für Sicherheit)
       - name: Verify Cypress installation
         run: npx cypress verify
 
-      # 5 Cypress Tests ausführen
+      # 4 Cypress Tests ausführen
       - name: Run Cypress E2E Tests
         run: npx cypress run
 
-      # 6 Optional: Screenshots und Videos hochladen (falls Cypress konfiguriert)
+      # 5 Optional: Testartefakte hochladen
       # - name: Upload Cypress artifacts
       #   uses: actions/upload-artifact@v3
       #   with:
