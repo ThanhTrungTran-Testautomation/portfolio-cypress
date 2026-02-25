@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: cypress/browsers:node20.2.0-chrome114-ff112
+      image: cypress/browsers:node20.2.0-chrome116-ff115
 
     steps:
       # 1 Repository auschecken
