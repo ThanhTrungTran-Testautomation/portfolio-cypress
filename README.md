@@ -1,8 +1,9 @@
 # Cypress End-to-End Test Automation Portfolio
 Autor: Thanh-Trung Tran
 
-Dieses Portfolio demonstriert eine modulare und skalierbare Architektur für End-to-End-Testautomatisierung mit Cypress.  
-Die Tests sind containerisiert (Docker), CI/CD-integriert (GitLab CI) und für die Ausführung in cloudbasierten Kubernetes-Clustern vorbereitet.
+Dieses Portfolio demonstriert eine modulare und skalierbare Architektur für End-to-End-Testautomatisierung mit Cypress.
+Die Lösung basiert auf dem Page Object Model Ansatz, Custom Commands und einer strukturierten Testarchitektur.
+Die E2E-Tests sind containerisiert mit Docker, kontinuierlich in CI/CD-Pipelines über Gitlab CI integriert und für eine skalierbare, cloud-native Ausführung in Kubernetes-Clustern konzipiert.
 
 ## Architektur
 - Page Object Model (POM): Strukturierung der UI-Interaktionen in wiederverwendbare Seitenobjekte zur Kapselung von Selektoren und Aktionen sowie zur Verbesserung von Wartbarkeit und Lesbarkeit
@@ -11,11 +12,11 @@ Die Tests sind containerisiert (Docker), CI/CD-integriert (GitLab CI) und für d
 - Utilities: Helper Funktionen, Environment Handling  
 
 ## CI/CD
-- GitLab CI/CD Pipeline mit install → test → report stages  
+- GitLab CI/CD Pipeline mit build → test → report stages  
 - Artefakt-Sicherung: Screenshots, Videos  
 - MR-Trigger und Headless Execution  
 
 ## Kubernetes & Containerization
 - Dockerfile: Cypress + Browser Container  
-- Kubernetes Deployment & Job: skalierbare, reproduzierbare Testausführung  
+- Kubernetes Job: skalierbare, reproduzierbare Testausführung
 - Cloud-native und DevOps-ready  

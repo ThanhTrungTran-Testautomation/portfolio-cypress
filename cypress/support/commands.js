@@ -6,6 +6,17 @@ Cypress.Commands.add('login', (username, password) => {
   cy.get('input[name="password"]').type(password)
   cy.get('button[type="submit"]').click()
 })
+
+Cypress.Commands.add('apiGet', (endpoint, status = 200) => {
+  cy.request({
+    method: 'GET',
+    url: endpoint,
+    failOnStatusCode: false
+  }).then((response) => {
+    expect(response.status).to.eq(status)
+    return response.body
+  })
+})
 //
 // -- This is a parent command --
 // Cypress.Commands.add('login', (email, password) => { ... })

@@ -24,9 +24,12 @@ RUN npm ci
 COPY . .
 
 # ----------------------------------
-# Cypress Cache vorbereiten
+# Cypress Verify
 # ----------------------------------
 RUN npx cypress verify
+
+# Verzeichnis für Reports vorbereiten
+RUN mkdir -p /app/results /app/cypress/screenshots /app/cypress/videos
 
 # Environment Variables default
 ENV CYPRESS_baseUrl="http://localhost:3000"
@@ -34,6 +37,6 @@ ENV CYPRESS_loginPath="/login"
 ENV CYPRESS_dashboardPath="/dashboard"
 
 # ----------------------------------
-# Standard Command (CI Execution)
+# Local Tests Execution
 # ----------------------------------
 CMD ["npx", "cypress", "run", "--browser", "chrome", "--headless"]

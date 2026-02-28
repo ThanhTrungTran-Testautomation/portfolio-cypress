@@ -1,11 +1,8 @@
-image: cypress/browsers:node18.12.0-chrome107
-
-stages:
-  - install
+stages:  
+  - build
   - test
-  - report
 
-# Variables für verschiedene Environments
+# Variables
 # -----------------------------
 variables:
   CYPRESS_baseUrl: "https://portfolio.com"
@@ -13,6 +10,8 @@ variables:
   CYPRESS_dashboardPath: "/dashboard"
   NODE_ENV: "test"
   CYPRESS_CACHE_FOLDER: "$CI_PROJECT_DIR/cache/Cypress"
+  IMAGE_NAME: registry.gitlab.com/<username>/<projectname>/cypress-tests-image
+  RUN_IN_CLUSTER: "true"
 
 cache:
   key: ${CI_COMMIT_REF_SLUG}
@@ -20,24 +19,29 @@ cache:
     - node_modules/
     - cache/Cypress
 
-# ---------------------------
-# INSTALL DEPENDENCIES
-# ---------------------------
-install_dependencies:
-  stage: install
+# Docker build
+# -----------------------------
+build-image:
+  stage: build
+  image: docker:24
+  services:
+    - docker:24-dind
   script:
-    - npm ci
-  artifacts:
-    paths:
-      - node_modules/
-    expire_in: 1 hour
+    - docker build -t $IMAGE_NAME:$CI_COMMIT_SHA .
+    - docker push $IMAGE_NAME:$CI_COMMIT_SHA
 
 # ---------------------------
+# Tests laufen entweder in Job der CI/CD-Pipelines oder Kubernetes-Cluster
+# Option 1 - Tests in Pipelines laufen
 # E2E TEST EXECUTION
 # ---------------------------
 cypress_e2e_tests:
   stage: test
+  image: $IMAGE_NAME:$CI_COMMIT_SHA
   script:
+    - npm ci    # installiert alle devDependencies
+    - npm start &   # Demo-app im Hintergrund starten
+    - npx wait-on http://localhost:3000    
     - npx cypress verify
     - npx cypress run --browser chrome --headless
   artifacts:
@@ -45,28 +49,61 @@ cypress_e2e_tests:
     paths:
       - cypress/videos/
       - cypress/screenshots/
+      - results/
+    reports:
+      junit: results/junit.xml
     expire_in: 7 days
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH
 
 # ---------------------------
-# OPTIONAL: PARALLEL EXECUTION
+# ALTERNATIVE PARALLEL EXECUTION
 # ---------------------------
 cypress_parallel:
   stage: test
+  image: $IMAGE_NAME:$CI_COMMIT_SHA
   parallel: 3
   script:
-    - npx cypress run --record --parallel --browser chrome
+    - npm ci
+    - npm start &   # Demo-app mit URL http://localhost:3000 verfügbar machen
+    - npx wait-on http://localhost:3000 
+    - npx cypress verify
+    - npx cypress run --record --parallel --browser chrome --ci-build-id $CI_PIPELINE_ID
+  artifacts:
+    when: always
+    paths:
+      - cypress/videos/
+      - cypress/screenshots/
+      - results/
+    reports:
+      junit: results/*.xml
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
   when: manual
-
-# ---------------------------
-# SIMPLE REPORT STAGE
-# ---------------------------
-generate_report:
-  stage: report
+# -----------------------------
+# Alternative Option 2 - Tests laufen in Kubernetes-Cluster
+# Kubernetes Job Trigger
+# -----------------------------
+e2e_tests_cluster:
+  stage: test
+  image: bitnami/kubectl:latest
   script:
-    - echo "Generating summary..."
-  when: always
+    - kubectl apply -f k8s/job.yaml
+    - kubectl wait --for=condition=complete job/cypress-run --timeout=300s
+    # Pod-Namen holen
+    - POD_NAME=$(kubectl get pods -l job-name=cypress-run -o jsonpath="{.items[0].metadata.name}")    
+    # Reports aus Pod kopieren
+    - kubectl cp $POD_NAME:/app/results ./results
+    - kubectl cp $POD_NAME:/app/cypress/videos ./cypress/videos
+    - kubectl cp $POD_NAME:/app/cypress/screenshots ./cypress/screenshots
+  artifacts:
+    when: always
+    paths:
+      - results/
+      - cypress/videos/
+      - cypress/screenshots/
+    reports:
+      junit: results/*.xml
+  rules:
+    - if: '$RUN_IN_CLUSTER == "true"'
