@@ -20,8 +20,11 @@ async function login() {
     })
   })
 
-  document.getElementById('result').innerText =
-    res.status === 200 ? "Success" : "Fail"
+  if (res.status === 200) {
+    window.location.href = '/dashboard'
+  } else {
+    document.getElementById('result').innerText = "Fail"
+  }
 }
 </script>
 
