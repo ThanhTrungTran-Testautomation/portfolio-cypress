@@ -1,9 +1,13 @@
 const express = require('express')
+const path = require('path')
 const app = express()
 
 app.use(express.json())
+
+// Static Files
 app.use(express.static('demo-app/public'))
 
+// API Routes
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' })
 })
@@ -16,4 +20,11 @@ app.post('/api/login', (req, res) => {
   res.status(401).json({ success: false })
 })
 
-app.listen(3000, '0.0.0.0', () => console.log('App running on port 3000'))
+// SPA Fallback
+app.get('*', (req, res) => {
+  res.sendFile(path.resolve(__dirname, 'demo-app/public/index.html'))
+})
+
+app.listen(3000, '0.0.0.0', () =>
+  console.log('App running on port 3000')
+)

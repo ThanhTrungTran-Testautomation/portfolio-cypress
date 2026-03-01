@@ -36,7 +36,6 @@ jobs:
       - name: Run Cypress Tests
         run: npx cypress run --browser chrome --headless
 
-
       # 4 Artefakte hochladen
       - name: Upload Cypress artifacts
         if: always()
