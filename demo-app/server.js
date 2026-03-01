@@ -16,7 +16,7 @@ console.log(staticPath)
 // API ROUTES
 // ---------------------------------------------------
 
-// Health endpoint (für CI / start-server-and-test)
+// Health endpoint
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok' })
 })
@@ -33,7 +33,7 @@ app.post('/api/login', (req, res) => {
 })
 
 // ---------------------------------------------------
-// SPA FALLBACK (GANZ AM ENDE!)
+// SPA FALLBACK
 // ---------------------------------------------------
 app.get('*', (req, res) => {
   res.sendFile(path.join(staticPath, 'index.html'))
