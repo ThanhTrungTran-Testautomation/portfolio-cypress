@@ -2,7 +2,7 @@ const express = require('express')
 const app = express()
 
 app.use(express.json())
-app.use(express.static('app/public'))
+app.use(express.static('demo-app/public'))
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' })
