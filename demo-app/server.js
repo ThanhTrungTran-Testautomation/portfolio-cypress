@@ -15,7 +15,13 @@ console.log(staticPath)
 // ---------------------------------------------------
 // API ROUTES
 // ---------------------------------------------------
-
+app.get('/api/dashboard/stats', (req, res) => {
+  res.json({
+    totalUsers: 1,
+    activeUsers: 1,
+    revenue: 12345
+  })
+})
 // Health endpoint
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok' })

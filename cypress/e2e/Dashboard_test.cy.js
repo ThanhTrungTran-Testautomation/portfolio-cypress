@@ -13,7 +13,7 @@ describe('Dashboard-Tests', () => {
 
   before(() => {
     cy.fixture('user').then((user) => cy.wrap(user).as('userData'))
-    cy.fixture('formData').then((data) => cy.wrap(data).as('formData'))
+    cy.fixture('form').as('formData')
   })
 
   it('Login and Dashboard Checks', function () {
