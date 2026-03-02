@@ -3,7 +3,7 @@
 import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
 import FormPage from './pages/FormPage'
-import Utils from './support/utils'
+import Utils from '../support/utils'
 
 describe('Dashboard-Tests', () => {
 
