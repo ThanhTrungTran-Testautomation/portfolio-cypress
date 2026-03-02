@@ -1,0 +1,32 @@
+<!-- public/form.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Form</title>
+</head>
+<body>
+
+  <h1>Form Demo</h1>
+
+  <form id="demo-form">
+    <input name="firstName" placeholder="First Name" />
+    <input name="lastName" placeholder="Last Name" />
+    <select name="country">
+      <option value="">Select Country</option>
+      <option value="DE">Germany</option>
+      <option value="US">USA</option>
+    </select>
+    <button type="submit">Submit</button>
+  </form>
+
+  <div class="success-message" style="display:none;">submitted successfully</div>
+
+  <script>
+    document.getElementById('demo-form').addEventListener('submit', function(e) {
+      e.preventDefault()
+      document.querySelector('.success-message').style.display = 'block'
+    })
+  </script>
+
+</body>
+</html>
