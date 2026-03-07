@@ -37,9 +37,28 @@ jobs:
           npx wait-on http://localhost:3000
 
       - name: Run Cypress Tests
-        run: npx cypress run --browser chrome --headless      
+        run: npx cypress run --browser chrome --headless
+        
+      - name: Rename JUnit files
+        run: |
+          for file in results/junit-*.xml; do
+          SPEC_NAME=$(grep -oP '(?<=<testsuite name=")[^"]+' "$file" | head -1)
+          mv "$file" "results/junit-$SPEC_NAME.xml"
+          done
 
-      # Artefakte hochladen
+      - name: List files in results folder
+        run: ls -R results
+
+      - name: Merge Mochawesome reports
+        if: always()
+        run: |
+          npx mochawesome-merge results/*.json > results/report.json
+          npx marge results/report.json -f report -o results  
+      
+      - name: List files in results folder
+        run: ls -R results
+
+        # Artefakte hochladen
       - name: Upload Cypress artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -48,13 +67,7 @@ jobs:
           path: |
             results
             cypress/videos
-            cypress/screenshots
-
-      - name: Merge Mochawesome reports
-        if: always()
-        run: |
-          npx mochawesome-merge results/*.json > results/report.json
-          npx marge results/report.json -f report -o results      
+            cypress/screenshots          
 
       - name: Upload HTML Report
         if: always()
@@ -71,9 +84,8 @@ jobs:
         uses: dorny/test-reporter@v1
         with:
           name: Cypress Tests
-          path: results/*.*
-          reporter: java-junit
-          max-annotations: 10                   
+          path: results/*.xml
+          reporter: java-junit                
 
       - name: Add summary
         if: always()

@@ -1,14 +1,16 @@
 const { defineConfig } = require("cypress");
 
 module.exports = defineConfig({
+
   reporter: "mocha-multi-reporters",
 
   reporterOptions: {
-
     reporterEnabled: "mocha-junit-reporter, mochawesome",
 
     mochaJunitReporterReporterOptions: {
-      configFile: "reporter-config.json"
+      mochaFile: "results/junit-[hash].xml",
+      testsuitesTitle: "Cypress Tests",
+      toConsole: false
     },
 
     mochawesomeReporterOptions: {
@@ -17,18 +19,24 @@ module.exports = defineConfig({
       html: true,
       json: true,
       reportTitle: "Cypress Test Report",
-      embeddedScreenshots: true
-    }},
+      embeddedScreenshots: true,
+      inlineAssets: true
+    }
+  },
+
   e2e: {
-    baseUrl: 'http://localhost:3000',  // Basis-URL für alle Tests
-    supportFile: 'cypress/support/e2e.js',
-    specPattern: 'cypress/e2e/**/*.cy.{js,ts}',
+    baseUrl: "http://localhost:3000",
+    supportFile: "cypress/support/e2e.js",
+    specPattern: "cypress/e2e/**/*.cy.{js,ts}",
+
     setupNodeEvents(on, config) {
-      // Node Event Hooks für CI/CD, Plugins oder Tasks
-    },
+      // Plugins oder Tasks können hier registriert werden
+      return config;
+    }
   },
+
   env: {
-    loginPath: '/login',
-    dashboardPath: '/dashboard'
-  },
+    loginPath: "/login",
+    dashboardPath: "/dashboard"
+  }
 });
