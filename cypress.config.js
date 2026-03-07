@@ -8,8 +8,7 @@ module.exports = defineConfig({
     reporterEnabled: "mocha-junit-reporter, mochawesome",
 
     mochaJunitReporterReporterOptions: {
-      mochaFile: "results/junit-[spec].xml",
-      testsuitesTitle: "Cypress Tests"
+      configFile: "reporter-config.json"
     },
 
     mochawesomeReporterOptions: {
@@ -17,10 +16,8 @@ module.exports = defineConfig({
       overwrite: false,
       html: true,
       json: true,
-      charts: true,
       reportTitle: "Cypress Test Report",
-      embeddedScreenshots: true,
-      inlineAssets: true
+      embeddedScreenshots: true
     }},
   e2e: {
     baseUrl: 'http://localhost:3000',  // Basis-URL für alle Tests

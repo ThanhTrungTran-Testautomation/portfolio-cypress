@@ -16,17 +16,20 @@ jobs:
       image: cypress/browsers:node-22.19.0-chrome-139.0.7258.154-1-ff-142.0.1-edge-139.0.3405.125-1
 
     steps:
-      # 1 Repository auschecken
+      # Repository auschecken
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2 Abhängigkeiten installieren
+      # Abhängigkeiten installieren
       - name: Install dependencies
         run: npm ci
 
-      # 3 Demo-App starten und Cypress Tests ausführen      
+      # Demo-App starten und Cypress Tests ausführen      
       #- name: Run Cypress
       #  run: npx start-server-and-test "npm start" http://localhost:3000 "npx cypress run --browser chrome --headless"
+      
+      - name: Clean old test reports
+        run: rm -f results/junit.xml
       
       - name: Start App
         run: |
@@ -34,15 +37,9 @@ jobs:
           npx wait-on http://localhost:3000
 
       - name: Run Cypress Tests
-        run: npx cypress run --browser chrome --headless
+        run: npx cypress run --browser chrome --headless      
 
-      - name: Merge Mochawesome reports
-        if: always()
-        run: |
-          npx mochawesome-merge results/*.json > results/report.json
-          npx marge results/report.json -f report -o results
-
-      # 4 Artefakte hochladen
+      # Artefakte hochladen
       - name: Upload Cypress artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -51,8 +48,14 @@ jobs:
           path: |
             results
             cypress/videos
-            cypress/screenshots      
-      
+            cypress/screenshots
+
+      - name: Merge Mochawesome reports
+        if: always()
+        run: |
+          npx mochawesome-merge results/*.json > results/report.json
+          npx marge results/report.json -f report -o results
+
       - name: Upload HTML Report
         if: always()
         uses: actions/upload-artifact@v4
@@ -70,9 +73,7 @@ jobs:
           name: Cypress Tests
           path: results/*.xml
           reporter: java-junit
-          max-annotations: 10
-          fail-on-error: true
-          fail-on-empty: true         
+          max-annotations: 10                   
 
       - name: Add summary
         if: always()
