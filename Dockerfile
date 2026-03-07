@@ -2,7 +2,7 @@
 # ----------------------------------
 # Base Image mit Node + Browsern
 # ----------------------------------
-FROM cypress/browsers:node18.12.0-chrome107-ff106 AS builder
+FROM cypress/browsers:node-22.19.0-chrome-139.0.7258.154-1-ff-142.0.1-edge-139.0.3405.125-1 AS builder
 
 # ----------------------------------
 # Arbeitsverzeichnis
