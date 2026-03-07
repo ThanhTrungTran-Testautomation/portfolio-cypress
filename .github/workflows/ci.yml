@@ -100,11 +100,11 @@ jobs:
     needs: build-image
     runs-on: ubuntu-latest
 
-  strategy:
-    matrix:
-      container: [1,2,3]
+    strategy:
+      matrix:
+        container: [1,2,3]
 
-  steps:
+    steps:
     - uses: actions/checkout@v4
 
     - name: Pull image
@@ -114,11 +114,11 @@ jobs:
       run: docker run -d -p 3000:3000 ghcr.io/${{ github.repository }}/app:${{ github.sha }}
 
     - name: Start App
-        run: |
+      run: |
           npm start &
           npx wait-on http://localhost:3000
-          
-      - name: Run Cypress parallel
+
+    - name: Run Cypress parallel
       run: |
         npx cypress run \
         --record \
