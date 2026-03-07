@@ -36,6 +36,12 @@ jobs:
       - name: Run Cypress Tests
         run: npx cypress run --browser chrome --headless
 
+      - name: Merge Mochawesome reports
+        if: always()
+        run: |
+          npx mochawesome-merge results/*.json > results/report.json
+          npx marge results/report.json -f report -o results
+
       # 4 Artefakte hochladen
       - name: Upload Cypress artifacts
         if: always()
@@ -46,17 +52,30 @@ jobs:
             results
             cypress/videos
             cypress/screenshots      
-          
+      
+      - name: Upload HTML Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-html-report
+          path: results/report.html
+
+      - name: Fix Git safe directory
+        run: git config --global --add safe.directory $GITHUB_WORKSPACE
+
       - name: Publish Test Report
         if: always()
         uses: dorny/test-reporter@v1
         with:
           name: Cypress Tests
-          path: results/junit.xml
-          reporter: java-junit           
+          path: results/*.xml
+          reporter: java-junit
+          max-annotations: 10
+          fail-on-error: true
+          fail-on-empty: true         
 
-      - name: Add Summary
+      - name: Add summary
         if: always()
         run: |
-            echo "## Cypress Test Results" >> $GITHUB_STEP_SUMMARY
-            echo "See detailed report above." >> $GITHUB_STEP_SUMMARY
+          echo "## Cypress Test Report" >> $GITHUB_STEP_SUMMARY
+          echo "[Download HTML Report](./results/report.html)" >> $GITHUB_STEP_SUMMARY

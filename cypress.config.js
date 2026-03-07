@@ -1,11 +1,27 @@
 const { defineConfig } = require("cypress");
 
 module.exports = defineConfig({
-  reporter: "mocha-junit-reporter",
+  reporter: "mocha-multi-reporters",
+
   reporterOptions: {
-    mochaFile: "results/junit-[hash].xml",
-    toConsole: false
-  },
+
+    reporterEnabled: "mocha-junit-reporter, mochawesome",
+
+    mochaJunitReporterReporterOptions: {
+      mochaFile: "results/junit-[spec].xml",
+      testsuitesTitle: "Cypress Tests"
+    },
+
+    mochawesomeReporterOptions: {
+      reportDir: "results",
+      overwrite: false,
+      html: true,
+      json: true,
+      charts: true,
+      reportTitle: "Cypress Test Report",
+      embeddedScreenshots: true,
+      inlineAssets: true
+    }},
   e2e: {
     baseUrl: 'http://localhost:3000',  // Basis-URL für alle Tests
     supportFile: 'cypress/support/e2e.js',

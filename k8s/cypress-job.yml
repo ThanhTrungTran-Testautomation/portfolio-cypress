@@ -19,6 +19,11 @@ spec:
               value: "/login"
             - name: CYPRESS_dashboardPath
               value: "/dashboard"
+            - name: CYPRESS_RECORD_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: cypress-secret
+                  key: record-key
           command:
             - sh
             - -c
