@@ -73,18 +73,6 @@ jobs:
       #    IMAGE=$(echo "${IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')  
       #    docker run -d -p 3000:3000 $IMAGE:{{ github.sha }}
 
-      - name: Check containers
-        run: docker ps -a
-
-      - name: Container logs
-        run: docker logs $(docker ps -q)
-
-      - name: Show containers
-        run: docker ps -a
-
-      - name: Show logs
-        run: docker logs $(docker ps -q)
-
       #- name: Test endpoint 3000
       #  run: curl -v http://localhost:3000
 
