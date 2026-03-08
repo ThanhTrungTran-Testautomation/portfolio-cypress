@@ -65,7 +65,8 @@ jobs:
       
       - name: Start container
         run: |
-          docker run -d -p 3000:3000 ghcr.io/${{ github.repository }}/app:${{ github.sha }}
+          IMAGE=$(echo "${IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')  
+          docker run -d -p 3000:3000 IMAGE:${{ github.sha }}
       
       - name: Start App
         run: |
