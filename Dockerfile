@@ -38,7 +38,8 @@ FROM cypress/browsers:node-22.19.0-chrome-139.0.7258.154-1-ff-142.0.1-edge-139.0
 
 WORKDIR /app
 
-COPY --from=builder /app /app   
+COPY --from=builder /app /app
+EXPOSE 3000
 # ----------------------------------
 # Local Tests Execution
 # ----------------------------------
