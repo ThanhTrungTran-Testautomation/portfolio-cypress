@@ -82,6 +82,9 @@ jobs:
       #- name: Fix permissions
       #  run: chmod +x node_modules/.bin/*
       
+      - name: Install dependencies
+        run: npm ci
+      
       - name: Start App
         run: |
           npm install   # falls noch nötig, z.B. node_modules
