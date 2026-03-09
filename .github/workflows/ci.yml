@@ -147,7 +147,10 @@ jobs:
         docker run -d -p 3000:3000 $IMAGE:${{ github.sha }}
 
     - name: Start App
-      run: npx wait-on http://localhost:3000
+      
+      run: |        
+        npm start &   # App im Hintergrund
+        npx wait-on http://localhost:3000
 
     - name: Run Cypress parallel
       run: |
