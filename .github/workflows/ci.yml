@@ -150,7 +150,7 @@ jobs:
       
       run: |        
         npm start &   # App im Hintergrund
-        wait-on http://localhost:3000
+        npx wait-on http://localhost:3000
 
     - name: Run Cypress parallel
       run: |
