@@ -157,7 +157,7 @@ jobs:
       run: |
         npx cypress run \
         --browser chrome --headless \
-        --env split=true,splitIndex=[0,1],splitTotal=2
+        --env split=true,splitIndex=0,splitTotal=2
 
   # ------------------------------------------------
 # CYPRESS TEST IN KUBERNETES

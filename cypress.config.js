@@ -32,13 +32,18 @@ module.exports = defineConfig({
 
     setupNodeEvents(on, config) {
       // Plugins oder Tasks können hier registriert werden
-      cypressSplit(on, config)
+      if (config.env.split) {
+        cypressSplit(on, config);
+      }
       return config;
     }
   },
 
   env: {
     loginPath: "/login",
-    dashboardPath: "/dashboard"
+    dashboardPath: "/dashboard",
+    split: false,      // Default false, wird per CLI überschrieben
+    splitIndex: 0,     // Default 0
+    splitTotal: 1      // Default 1
   }
 });
