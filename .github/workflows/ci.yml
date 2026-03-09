@@ -153,6 +153,11 @@ jobs:
         npm start &   # App im Hintergrund
         npx wait-on http://localhost:3000
 
+    - name: Debug split
+      run: |
+        echo "splitIndex = ${{ matrix.machine }}"
+        echo "splitTotal = 2"
+    
     - name: Run Cypress parallel
       run: |
         npx cypress run \
