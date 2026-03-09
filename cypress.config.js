@@ -33,6 +33,7 @@ module.exports = defineConfig({
     setupNodeEvents(on, config) {
       // Plugins oder Tasks können hier registriert werden
       if (config.env.split) {
+        console.log("Split detected:", config.env.splitIndex, config.env.splitTotal); // DEBUG
         cypressSplit(on, config);
       }
       return config;
