@@ -131,7 +131,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        container: [0,1,2]
+        machine: [0,1]
 
     steps:
     - uses: actions/checkout@v4
@@ -157,7 +157,7 @@ jobs:
       run: |
         npx cypress run \
         --browser chrome --headless \
-        --env split=true,splitIndex=${{ matrix.container }},splitTotal=3
+        --env split=true,splitIndex=${{ matrix.machine }},splitTotal=2
 
   # ------------------------------------------------
 # CYPRESS TEST IN KUBERNETES
