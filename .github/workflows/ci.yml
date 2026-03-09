@@ -82,8 +82,8 @@ jobs:
       #- name: Fix permissions
       #  run: chmod +x node_modules/.bin/*
       
-      #- name: Install dependencies
-       # run: npm ci
+      - name: Install dependencies
+        run: npm ci
       
       - name: Start App
         run: |
@@ -148,16 +148,15 @@ jobs:
     - name: Start App
       
       run: |        
-        npm ci  
-        npm install  
+        npm ci          
         npm start &   # App im Hintergrund
         npx wait-on http://localhost:3000
 
     - name: Run Cypress parallel
       run: |
         npx cypress run \
-        --record \
-        --parallel
+        --browser chrome --headless \
+        --env split=true,splitIndex=${{ matrix.machine }},splitTotal=3
 
   # ------------------------------------------------
 # CYPRESS TEST IN KUBERNETES

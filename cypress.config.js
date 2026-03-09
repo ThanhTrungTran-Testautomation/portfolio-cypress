@@ -1,4 +1,5 @@
 const { defineConfig } = require("cypress");
+const cypressSplit = require("cypress-split")
 
 module.exports = defineConfig({
 
@@ -31,6 +32,7 @@ module.exports = defineConfig({
 
     setupNodeEvents(on, config) {
       // Plugins oder Tasks können hier registriert werden
+      cypressSplit(on, config)
       return config;
     }
   },
