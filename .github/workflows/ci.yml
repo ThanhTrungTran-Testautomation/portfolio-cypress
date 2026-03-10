@@ -131,7 +131,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        machine: [0,1]
+        machine: [1,2]
 
     steps:
     - uses: actions/checkout@v4
@@ -164,14 +164,14 @@ jobs:
           --headless \
           --env split=true,splitIndex=${{ matrix.machine }},splitTotal=2
   
-  cypress-parallel-manuell-split:
+  cypress-parallel-manual-split:
     needs: build-image
     runs-on: ubuntu-latest  
 
     strategy:
       fail-fast: false
       matrix:
-        machine: [1,2,3]
+        machine: [1,2]
 
     steps:
 
@@ -195,7 +195,7 @@ jobs:
           npx cypress run --spec "cypress/e2e/Form_test.cy.js"
         fi        
 
-  test-spec:
+  cypress-parallel-environment:
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -205,6 +205,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Install dependencies
+        run: npm ci
+      
       - name: Start demo app
         run: |
           npm start &
