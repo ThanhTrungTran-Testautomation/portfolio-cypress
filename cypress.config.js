@@ -47,6 +47,12 @@ module.exports = defineConfig({
 
   env: {
     loginPath: "/login",
-    dashboardPath: "/dashboard"    
+    dashboardPath: "/dashboard",
+    split: "false",
+    splitIndex: 1,
+    plitTotal: 2,
+    SPEC: "cypress/e2e/**/*.cy.js",
+    SPLIT: 2,
+    SPLIT_INDEX: 1
   }
 });
