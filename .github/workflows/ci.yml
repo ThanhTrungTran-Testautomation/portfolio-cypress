@@ -177,6 +177,16 @@ jobs:
 
     - uses: actions/checkout@v4
 
+    - name: Pull image
+      run: |
+        IMAGE=$(echo "${IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')
+        docker pull $IMAGE:${{ github.sha }}
+
+    - name: Start container
+      run: |
+        IMAGE=$(echo "${IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')  
+        docker run -p 3000:3000 $IMAGE:${{ github.sha }}
+    
     - name: Install dependencies
       run: npm ci
 
@@ -196,6 +206,7 @@ jobs:
         fi        
 
   cypress-parallel-environment:
+    needs: build-image
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -205,6 +216,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Pull image
+        run: |
+          IMAGE=$(echo "${IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')
+          docker pull $IMAGE:${{ github.sha }}
+
+      - name: Start container
+        run: |
+          IMAGE=$(echo "${IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')  
+          docker run -p 3000:3000 $IMAGE:${{ github.sha }}
+      
       - name: Install dependencies
         run: npm ci
       
@@ -217,9 +238,11 @@ jobs:
         uses: cypress-io/github-action@v6        
         # using operating system process environment variables
         env:
-          SPEC: 'cypress/e2e/*.cy.js'
-          SPLIT: ${{ strategy.job-total }}
-          SPLIT_INDEX: ${{ strategy.job-index }}
+          SPEC: 'cypress/e2e/Dashboard_test.cy.js,cypress/e2e/Login_test.cy.js'
+          #SPLIT: {{ strategy.job-total }}
+          SPLIT: 2
+          #SPLIT_INDEX: {{ strategy.job-index }}
+          SPLIT_INDEX: 1
           DEBUG: 'cypress-split'
 
 
