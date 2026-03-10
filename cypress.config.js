@@ -31,7 +31,8 @@ module.exports = defineConfig({
     specPattern: "cypress/e2e/**/*.cy.{js,ts}",
 
     setupNodeEvents(on, config) {      
-      if (config.env.split === "true") {
+      console.log("ENV:", config.env)
+      if (config.env.split) {
         console.log(
           "Split:",
           config.env.splitIndex,
@@ -43,16 +44,5 @@ module.exports = defineConfig({
       }
       return config;
     }
-  },
-
-  env: {
-    loginPath: "/login",
-    dashboardPath: "/dashboard",
-    split: "false",
-    splitIndex: 1,
-    plitTotal: 2,
-    SPEC: "cypress/e2e/**/*.cy.js",
-    SPLIT: 2,
-    SPLIT_INDEX: 1
   }
 });

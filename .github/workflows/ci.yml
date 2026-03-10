@@ -131,7 +131,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        machine: [1,2]
+        machine: [0,1]
 
     steps:
     - uses: actions/checkout@v4
@@ -171,7 +171,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        machine: [1,2]
+        machine: [0,1]
 
     steps:
 
@@ -197,9 +197,9 @@ jobs:
 
     - name: Run Cypress
       run: |
-        if [ "${{ matrix.machine }}" = "1" ]; then
+        if [ "${{ matrix.machine }}" = "0" ]; then
           npx cypress run --spec "cypress/e2e/Login_test.cy.js"
-        elif [ "${{ matrix.machine }}" = "2" ]; then
+        elif [ "${{ matrix.machine }}" = "1" ]; then
           npx cypress run --spec "cypress/e2e/Dashboard_test.cy.js"
         else
           npx cypress run --spec "cypress/e2e/Form_test.cy.js"
@@ -211,7 +211,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        containers: [1, 2]
+        containers: [0, 1]
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -238,13 +238,10 @@ jobs:
         uses: cypress-io/github-action@v6        
         # using operating system process environment variables
         env:
-          SPEC: 'cypress/e2e/Dashboard_test.cy.js,cypress/e2e/Login_test.cy.js'
-          #SPLIT: {{ strategy.job-total }}
-          SPLIT: 2
-          #SPLIT_INDEX: {{ strategy.job-index }}
-          SPLIT_INDEX: 1
+          SPEC: 'cypress/e2e/*.cy.js'
+          SPLIT: ${{ strategy.job-total }}          
+          SPLIT_INDEX: ${{ strategy.job-index }}          
           DEBUG: 'cypress-split'
-
 
   # ------------------------------------------------
 # CYPRESS TEST IN KUBERNETES
