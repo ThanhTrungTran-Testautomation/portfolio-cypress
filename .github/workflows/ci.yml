@@ -150,7 +150,9 @@ jobs:
     - name: Start App
       
       run: |        
-        npm ci          
+        npm ci
+        npm install cypress-split --save-dev
+        npm install        
         npm start &   # App im Hintergrund
         npx wait-on http://localhost:3000    
     
