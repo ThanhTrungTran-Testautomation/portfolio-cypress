@@ -24,75 +24,50 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Convert image name to lowercase
-        id: vars
-        run: |
-          IMAGE=$(echo "${IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')
-          echo "image=$IMAGE" >> $GITHUB_OUTPUT
-      
+         
       - name: Login to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Build image
         run: |
           docker build \
-          --cache-from=${{ steps.vars.outputs.image }}:latest \
-          -t ${{ steps.vars.outputs.image }}:${{ github.sha }} \
-          -t ${{ steps.vars.outputs.image }}:latest .
+          --cache-from=${IMAGE_NAME }:latest \
+          -t ${IMAGE_NAME}:${{ github.sha }} \
+          -t ${IMAGE_NAME}:latest .
 
       - name: Push image
         run: |
-          docker push ${{ steps.vars.outputs.image }}:${{ github.sha }}
+          docker push ${IMAGE_NAME}:${{ github.sha }}
     
   # -----------------------------
   # CYPRESS TESTS
   # -----------------------------
-  cypress-run:
+  cypress-run-serial:
     needs: build-image
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/thanhtrungtran-testautomation/portfolio-cypress/app:${{ github.sha }}
+      image: ${IMAGE_NAME}:${{ github.sha }}
     steps:
       - uses: actions/checkout@v4
 
       #- name: Pull image
-      #  run: |
-      #    IMAGE=$(echo "${IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')
-      #    docker pull $IMAGE:{{ github.sha }}
+      #  run: |         
+      #    docker pull ${IMAGE_NAME}:${{ github.sha }}
 
-      # Demo-App starten und Cypress Tests ausführen      
-      #- name: Run Cypress
-      #  run: npx start-server-and-test "npm start" http://localhost:3000 "npx cypress run --browser chrome --headless"
+      #- name: Start container
+      #  run: |       
+      #    docker run -d -p 3000:3000 ${IMAGE_NAME}:${{ github.sha }}   
       
       - name: Clean old test reports
-        run: rm -f results/junit.xml
-      
-      #- name: Start container
-      #  run: |
-      #    IMAGE=$(echo "${IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')  
-      #    docker run -d -p 3000:3000 $IMAGE:{{ github.sha }}
-
-      #- name: Test endpoint 3000
-      #  run: curl -v http://localhost:3000
-
-      #- name: Test endpoint 8080
-      #  run: curl -v http://localhost:8080
-      
-      #- name: Fix permissions
-      #  run: chmod +x node_modules/.bin/*
-      
+        run: rm -f results/junit.xml          
+            
       - name: Install dependencies
         run: npm ci
-      
-      - name: Start App
-        run: |
-          npm start &   # App im Hintergrund
-          npx wait-on http://localhost:3000 -t 60000
 
-      - name: Run Cypress Tests
-        run: npx cypress run --browser chrome --headless
-         
+      # Demo-App starten und Cypress Tests ausführen      
+      - name: Run Cypress
+        run: npx start-server-and-test "npm start" http://localhost:3000 "npx cypress run --browser chrome --headless"
+                     
       - name: Rename JUnit files
         run: |
           for file in results/junit-*.xml; do
@@ -124,73 +99,253 @@ jobs:
             cypress/videos
             cypress/screenshots
 
-  cypress-parallel:
+  cypress-parallel-run-with-cypress-split:
     needs: build-image
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/thanhtrungtran-testautomation/portfolio-cypress/app:${{ github.sha }}
+      image: ${IMAGE_NAME}:${{ github.sha }}
     strategy:
       fail-fast: false
       matrix:
         machine: [0,1,2,3]
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v4    
 
-    #- name: Pull image
-    #  run: |
-    #    IMAGE=$(echo "${IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')
-    #    docker pull $IMAGE:{{ github.sha }}
-
-    #- name: Start container
-    #  run: |
-    #    IMAGE=$(echo "${IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')  
-    #    docker run -p 3000:3000 $IMAGE:{{ github.sha }}
-
-    - name: Start App
-      
+    - name: Start App      
       run: |        
         npm ci
         npm install cypress-split --save-dev
+        npm i -D cypress-split        
         npm install        
         npm start &   # App im Hintergrund
         npx wait-on http://localhost:3000    
     
     - name: Debug env
       run: |
-        echo "machine=${{ matrix.machine }}"    
+        echo "machine=${{ matrix.machine }}"
+    
+    - name: Debug specs
+      run: ls -R cypress
 
-    - name: Run Cypress tests  #uses: cypress-io/github-action@v5 
+    - name: Run Cypress tests
       run: |
           npx cypress run \
           --browser chrome \
           --headless \
           --env split=true,splitIndex=${{ matrix.machine }},splitTotal=4 \
-          --spec "cypress/e2e/**/*.cy.js"
+          --spec "cypress/e2e/*.cy.js"
+    
+  create-queue:
+    runs-on: ubuntu-latest
 
+    outputs:
+      specs: ${{ steps.specs.outputs.specs }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create test queue
+        id: specs
+        run: |
+          ls cypress/e2e/*.cy.js > spec-queue.txt
+          cat spec-queue.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: spec-queue
+          path: spec-queue.txt
   
-  cypress-parallel-manual-split:
-    needs: build-image
-    runs-on: ubuntu-latest  
-
+  cypress-parallel-dynamic-runner:
+    needs: 
+      - build-image
+      - create-queue
+    runs-on: ubuntu-latest
+    container:
+      image: ${IMAGE_NAME}:${{ github.sha }}
     strategy:
       fail-fast: false
       matrix:
-        machine: [0,1]
+        runner: [1,2,3,4]
 
     steps:
-
     - uses: actions/checkout@v4
 
-    - name: Pull image
-      run: |
-        IMAGE=$(echo "${IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')
-        docker pull $IMAGE:${{ github.sha }}
+    - uses: actions/download-artifact@v4
+      with:
+          name: spec-queue      
 
-    - name: Start container
+    - name: Start App      
+      run: |        
+        npm ci
+        npm install cypress-split --save-dev
+        npm i -D cypress-split        
+        npm install        
+        npm start &   # App im Hintergrund
+        npx wait-on http://localhost:3000    
+    
+    - name: Debug env
       run: |
-        IMAGE=$(echo "${IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')  
-        docker run -p 3000:3000 $IMAGE:${{ github.sha }}
+        echo "machine=${{ matrix.runner }}"
+    
+    - name: Debug specs
+      run: ls -R cypress
+
+    - name: Run tests dynamically
+      run: |
+        while true
+        do
+          SPEC=$(head -n 1 spec-queue.txt)
+          if [ -z "$SPEC" ]; then
+            echo "Queue empty"
+            break
+          fi
+
+          sed -i '1d' spec-queue.txt
+          echo "Running $SPEC"
+          npx cypress run \
+            --spec "$SPEC" \
+            --browser chrome \
+            --headless
+        done  
+
+  find-specs:    
+    runs-on: ubuntu-latest
+
+    outputs:
+      specs: ${{ steps.specs.outputs.specs }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Find Cypress specs
+        id: specs
+        run: |
+          SPECS=$(ls cypress/e2e/*.cy.js | sort -r | jq -R -s -c 'split("\n")[:-1]')
+          echo "specs=$SPECS" >> $GITHUB_OUTPUT
+          echo "Detected and sorted specs: $SPECS"
+  
+  cypress-parallel-without-cypress-split:
+    needs: find-specs
+    runs-on: ubuntu-latest
+    container:
+      image: ${IMAGE_NAME}:${{ github.sha }}
+    strategy:
+      fail-fast: false
+      matrix:
+        spec: ${{ fromJson(needs.find-specs.outputs.specs) }}
+        
+    steps:
+    - uses: actions/checkout@v4    
+
+    - name: Start App
+      
+      run: |        
+        npm ci                
+        npm install        
+        npm start &   # App im Hintergrund
+        npx wait-on http://localhost:3000    
+    
+    - name: Debug env
+      run: |
+        echo "machine=${{ matrix.spec }}"
+    
+    - name: Debug specs
+      run: ls -R cypress
+    
+    - name: Run Cypress tests
+      run: |
+        echo "Running spec: ${{ matrix.spec }}"  
+        npx cypress run \
+        --browser chrome \
+        --headless \
+        --spec "${{ matrix.spec }}"  \
+            --reporter mochawesome \
+            --reporter-options reportDir=results,overwrite=false,html=false,json=true
+    
+    - name: Upload results
+      uses: actions/upload-artifact@v4
+      with:
+        name: results-${{ matrix.spec }}
+        path: results
+
+# ------------------------------------------------
+# MERGE TEST REPORTS
+# ------------------------------------------------
+  merge-reports:
+    needs: cypress-parallel-without-cypress-split
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: reports
+
+      - name: Install report tools
+        run: |
+          npm install mochawesome mochawesome-merge mochawesome-report-generator
+
+      - name: Merge reports
+        run: |
+          npx mochawesome-merge reports/**/results/*.json > merged-report.json
+
+      - name: Generate HTML report
+        run: |
+          npx mochawesome-report-generator merged-report.json \
+            --reportDir final-report \
+            --reportFilename index \
+            --inline
+
+      - name: Upload final report
+        uses: actions/upload-artifact@v4
+        with:
+          name: final-report
+          path: final-report
+
+# ------------------------------------------------
+# DEPLOY REPORT TO GITHUB PAGES
+# ------------------------------------------------
+  deploy-report:
+    needs: merge-reports
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Download final report
+        uses: actions/download-artifact@v4
+        with:
+          name: final-report
+          path: site
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4      
+
+  cypress-parallel-static-runner:
+    needs: build-image
+    runs-on: ubuntu-latest  
+    container:
+      image: ${IMAGE_NAME}:${{ github.sha }}
+    strategy:
+      fail-fast: false
+      matrix:
+        machine: [0,1,2,3]
+
+    steps:
+    - uses: actions/checkout@v4    
     
     - name: Install dependencies
       run: npm ci
@@ -206,17 +361,21 @@ jobs:
           npx cypress run --spec "cypress/e2e/Login_test.cy.js"
         elif [ "${{ matrix.machine }}" = "1" ]; then
           npx cypress run --spec "cypress/e2e/Dashboard_test.cy.js"
-        else
-          npx cypress run --spec "cypress/e2e/Form1_test.cy.js"
+        elif [ "${{ matrix.machine }}" = "2" ]; then
+          npx cypress run --spec "cypress/e2e/Form_test.cy.js"
+          else
+          npx cypress run --spec "cypress/e2e/Utils_test.cy.js"
         fi        
 
-  cypress-parallel-environment:
+  cypress-parallel-with-github-actions:
     needs: build-image
     runs-on: ubuntu-24.04
+    container:
+      image: ${IMAGE_NAME}:${{ github.sha }}
     strategy:
       fail-fast: false
       matrix:
-        containers: [0, 1]
+        containers: [0,1,2,3]
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -240,10 +399,10 @@ jobs:
           npx wait-on http://localhost:3000
       
       - name: Run split Cypress E2E tests        
-        uses: cypress-io/github-action@v6        
-        # using operating system process environment variables
+        uses: cypress-io/github-action@v6 
+        
         env:
-          SPEC: 'cypress/e2e/*.cy.js'
+          SPEC: 'cypress/e2e/Login_test.cy.js,cypress/e2e/Dashboard_test.cy.js,cypress/e2e/Form_test.cy.js,cypress/e2e/Utils_test.cy.js'
           SPLIT: ${{ strategy.job-total }}          
           SPLIT_INDEX: ${{ strategy.job-index }}          
           DEBUG: 'cypress-split'
@@ -251,25 +410,80 @@ jobs:
   # ------------------------------------------------
 # CYPRESS TEST IN KUBERNETES
 # ------------------------------------------------
-#  cypress-cluster:
- #   needs: build-image
-  #  
-   # runs-on: ubuntu-latest
+  cypress-cluster:
+    needs: build-image
+    
+    runs-on: ubuntu-latest
 
-    #container:
-     # image: bitnami/kubectl:latest
+    container:
+      image: bitnami/kubectl:latest
 
-    #steps:
-     # - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-      #- name: Setup kubeconfig
-       # run: |
-        #  echo "{{ secrets.KUBE_CONFIG }}" > kubeconfig
-         # export KUBECONFIG=$PWD/kubeconfig >> $GITHUB_ENV
+      - name: Setup kubeconfig
+        run: |
+          echo "{{ secrets.KUBE_CONFIG }}" > kubeconfig
+          export KUBECONFIG=$PWD/kubeconfig >> $GITHUB_ENV
 
-     # - name: Test cluster connection
-      #  run: KUBECONFIG=$PWD/kubeconfig kubectl get nodes
+      - name: Test cluster connection
+        run: KUBECONFIG=$PWD/kubeconfig kubectl get nodes
 
-      #- name: Run Cypress job in cluster
-       # run: |
-        #  kubectl apply -f k8s/cypress-job2.yml
+      - name: Run Cypress job in cluster
+        run: |
+          kubectl apply -f k8s/cypress-gitlab-job.yml
+          kubectl apply -f k8s/cypress-github-job.yml
+
+      - name: Wait for Job
+        run: |
+          kubectl wait --for=condition=complete job/cypress-tests --timeout=600s
+
+      - name: Show pod logs
+        run: |
+          kubectl logs -l job-name=cypress-tests
+
+  # -----------------------------
+# MERGE REPORTS Cypress in Cluster
+# -----------------------------
+  merge-reports-cluster:
+    needs: cypress-cluster
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: reports
+
+      - name: Install report tools
+        run: |
+          npm install mochawesome mochawesome-merge mochawesome-report-generator
+
+      - name: Merge reports
+        run: |
+          npx mochawesome-merge reports/**/*.json > report.json
+      - name: Generate HTML
+        run: |
+          npx mochawesome-report-generator report.json \
+            --reportDir site \
+            --reportFilename index \
+            --inline
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  # -----------------------------
+# DEPLOY REPORT TO GITHUB PAGES
+# -----------------------------
+  deploy-report-cluster:
+    needs: merge-reports-cluster
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+
+    steps:
+      - uses: actions/deploy-pages@v4

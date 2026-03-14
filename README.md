@@ -1,5 +1,4 @@
 # Cypress End-to-End Test Automation Portfolio
-Autor: Thanh-Trung Tran
 
 Dieses Portfolio demonstriert eine modulare und skalierbare Architektur für End-to-End-Testautomatisierung mit Cypress.
 Die Lösung basiert auf dem Page Object Model Ansatz, Custom Commands und einer strukturierten Testarchitektur.
@@ -19,4 +18,6 @@ Die E2E-Tests sind containerisiert mit Docker, kontinuierlich in CI/CD-Pipelines
 ## Kubernetes & Containerization
 - Dockerfile: Cypress + Browser Container  
 - Kubernetes Job: skalierbare, reproduzierbare Testausführung
-- Cloud-native und DevOps-ready  
+
+## Autor
+M.Sc. Thanh-Trung Tran

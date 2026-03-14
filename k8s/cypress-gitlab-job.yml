@@ -4,13 +4,13 @@ metadata:
   name: cypress-run
   namespace: cypress-e2e
 spec:
-  completions: 3
-  parallelism: 3
+  completions: 4
+  parallelism: 4
   template:
     spec:
       containers:
         - name: cypress
-          image: $(echo "${ghcr.io/${{ github.repository }}/app}" | tr '[:upper:]' '[:lower:]'):${{ github.sha }}
+          image: $CI_REGISTRY_IMAGE/cypress-tests-image:latest
           # Environment Variables für URLs
           env:
             - name: CYPRESS_baseUrl
@@ -29,7 +29,7 @@ spec:
             - -c
             - |
               # App im Hintergrund starten
-              node app/server.js &
+              node demo-app/server.js &
               # Warten bis App auf localhost:3000 bereit ist
               npx wait-on http://localhost:3000
               # Cypress headless ausführen
