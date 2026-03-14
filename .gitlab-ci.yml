@@ -98,7 +98,7 @@ e2e_tests_cluster:
     - kubernetes
   script:
     - kubectl apply -f k8s/cypress-secret.yml
-    - kubectl apply -f k8s/cypress-job.yml
+    - kubectl apply -f k8s/cypress-gitlab-job.yml
     - kubectl wait --for=condition=complete job/cypress-run --timeout=300s
     # Pod-Namen holen
     - POD_NAME=$(kubectl get pods -l job-name=cypress-run -o jsonpath="{.items[0].metadata.name}")    

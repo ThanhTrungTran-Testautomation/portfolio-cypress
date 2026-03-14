@@ -32,20 +32,20 @@ spec:
               npx wait-on http://localhost:3000
 
               # Cypress headless ausführen              
-              #INDEX=$(echo $HOSTNAME | awk -F '-' '{print $NF}')
-              #echo "Runner index: $INDEX"
-              #SPECS=$(ls cypress/e2e/*.cy.js | sort)
-              #COUNT=0
-              #for SPEC in $SPECS
-              #do
-              #  if [ $((COUNT % TOTAL_RUNNERS)) -eq $INDEX ]; then
-              #    echo "Running $SPEC"
-              #    npx cypress run --spec "$SPEC" \
+              INDEX=$(echo $HOSTNAME | awk -F '-' '{print $NF}')
+              echo "Runner index: $INDEX"
+              SPECS=$(ls cypress/e2e/*.cy.js | sort)
+              COUNT=0
+              for SPEC in $SPECS
+              do
+                if [ $((COUNT % TOTAL_RUNNERS)) -eq $INDEX ]; then
+                  echo "Running $SPEC"
+                  npx cypress run --spec "$SPEC" \
                     --reporter mochawesome \
                     --reporter-options reportDir=results,overwrite=false,html=false,json=true                
-              #  fi
-              #  COUNT=$((COUNT+1))
-              #done
+                fi
+                COUNT=$((COUNT+1))
+              done
 
       restartPolicy: Never
   backoffLimit: 1
