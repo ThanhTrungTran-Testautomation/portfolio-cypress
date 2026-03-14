@@ -10,7 +10,7 @@ on:
 
 env:
   IMAGE_NAME: ghcr.io/thanhtrungtran-testautomation/portfolio-cypress/app
-  RUN_CYPRESS_CLUSTER: "true"
+  #RUN_CYPRESS_CLUSTER: "true"
 
 jobs:
   # -----------------------------
@@ -43,11 +43,11 @@ jobs:
   # CYPRESS TESTS
   # -----------------------------
   cypress-run-serial:
-    needs: build-image
-    runs-on: ubuntu-latest
-    container:
-      image: ${{ env.IMAGE_NAME }}:${{ github.sha }}
-    steps:
+      needs: build-image
+      runs-on: ubuntu-latest
+      container:
+        image: ghcr.io/thanhtrungtran-testautomation/portfolio-cypress/app:${{ github.sha }}
+      steps:
       - uses: actions/checkout@v4
 
       #- name: Pull image
@@ -103,7 +103,7 @@ jobs:
     needs: build-image
     runs-on: ubuntu-latest
     container:
-      image: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+      image: ghcr.io/thanhtrungtran-testautomation/portfolio-cypress/app:${{ github.sha }}
     strategy:
       fail-fast: false
       matrix:
@@ -162,7 +162,7 @@ jobs:
       - create-queue
     runs-on: ubuntu-latest
     container:
-      image: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+      image: ghcr.io/thanhtrungtran-testautomation/portfolio-cypress/app:${{ github.sha }}
     strategy:
       fail-fast: false
       matrix:
@@ -230,7 +230,7 @@ jobs:
     needs: find-specs
     runs-on: ubuntu-latest
     container:
-      image: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+      image: ghcr.io/thanhtrungtran-testautomation/portfolio-cypress/app:${{ github.sha }}
     strategy:
       fail-fast: false
       matrix:
@@ -338,7 +338,7 @@ jobs:
     needs: build-image
     runs-on: ubuntu-latest  
     container:
-      image: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+      image: ghcr.io/thanhtrungtran-testautomation/portfolio-cypress/app:${{ github.sha }}
     strategy:
       fail-fast: false
       matrix:
@@ -371,7 +371,7 @@ jobs:
     needs: build-image
     runs-on: ubuntu-24.04
     container:
-      image: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+      image: ghcr.io/thanhtrungtran-testautomation/portfolio-cypress/app:${{ github.sha }}
     strategy:
       fail-fast: false
       matrix:
