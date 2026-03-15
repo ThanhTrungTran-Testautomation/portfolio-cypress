@@ -21,7 +21,7 @@ jobs:
       packages: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
          
       - name: Login to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
@@ -46,7 +46,7 @@ jobs:
       container:
         image: ghcr.io/thanhtrungtran-testautomation/portfolio-cypress/app:${{ github.sha }}
       steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       #- name: Pull image
       #  run: |         
@@ -108,7 +108,7 @@ jobs:
         machine: [0,1,2,3]
 
     steps:
-    - uses: actions/checkout@v4    
+    - uses: actions/checkout@v6  
 
     - name: Start App      
       run: |        
@@ -141,7 +141,7 @@ jobs:
       specs: ${{ steps.specs.outputs.specs }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Create test queue
         id: specs
@@ -167,7 +167,7 @@ jobs:
         runner: [1,2]
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - uses: actions/download-artifact@v4
       with:
@@ -418,7 +418,7 @@ jobs:
     #container:
     #  image: bitnami/kubectl:latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup kubectl
         uses: azure/setup-kubectl@v3
@@ -438,6 +438,13 @@ jobs:
         run: |
           kubectl create namespace cypress-e2e --dry-run=client -o yaml | kubectl apply -f -
           
+      - name: Pull image from GHCR
+        run: |
+          docker pull ${IMAGE_NAME}:${{ github.sha }}
+
+      - name: Check local images
+        run: docker images
+      
       - name: Load built image into kind
         run: |
           kind load docker-image ${IMAGE_NAME}:${{ github.sha }} --name cypress
@@ -476,7 +483,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Download artifacts
         uses: actions/download-artifact@v4
