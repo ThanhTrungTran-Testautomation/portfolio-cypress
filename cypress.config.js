@@ -34,10 +34,7 @@ module.exports = defineConfig({
       if (config.env.SPLIT === 'true' || config.env.SPLIT === true) {
         console.log('SPLIT is set, loading cypress-split plugin')     
         cypressSplit(on, config)
-      }
-      else {
-        console.log('SPLIT is not set, skipping cypress-split plugin')
-      }
+      }      
       return config;
     }
   }

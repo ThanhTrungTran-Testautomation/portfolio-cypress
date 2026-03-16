@@ -10,7 +10,7 @@ spec:
     spec:
       containers:
         - name: cypress
-          image: $(echo "${ghcr.io/${{ github.repository }}/app}" | tr '[:upper:]' '[:lower:]'):${{ github.sha }}
+          image: ghcr.io/thanhtrungtran-testautomation/portfolio-cypress/app:IMAGE_TAG
           # Environment Variables für URLs
           env:
             - name: CYPRESS_baseUrl
@@ -20,29 +20,36 @@ spec:
             - name: CYPRESS_dashboardPath
               value: "/dashboard"
             - name: TOTAL_RUNNERS
-              value: "4"            
+              value: "4" 
+            - name: JOB_COMPLETION_INDEX
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['batch.kubernetes.io/job-completion-index']           
           command:
             - sh
             - -c
             - |
-              echo "Pod index: $HOSTNAME"
+              echo "Runner index: $JOB_COMPLETION_INDEX"
+              #echo "Pod index: $HOSTNAME"
+              npm ci
               # App im Hintergrund starten
               node demo-app/server.js &
               # Warten bis App auf localhost:3000 bereit ist
               npx wait-on http://localhost:3000
-
+              
               # Cypress headless ausführen              
-              INDEX=$(echo $HOSTNAME | awk -F '-' '{print $NF}')
+              #INDEX=$(echo $HOSTNAME | awk -F '-' '{print $NF}')
+              INDEX=$JOB_COMPLETION_INDEX
               echo "Runner index: $INDEX"
               SPECS=$(ls cypress/e2e/*.cy.js | sort)
               COUNT=0
               for SPEC in $SPECS
               do
-                if [ $((COUNT % TOTAL_RUNNERS)) -eq $INDEX ]; then
+                if [ $((COUNT % $TOTAL_RUNNERS)) -eq $INDEX ]; then
                   echo "Running $SPEC"
-                  npx cypress run --spec "$SPEC" \
-                    --reporter mochawesome \
-                    --reporter-options reportDir=results,overwrite=false,html=false,json=true                
+                  npx cypress run --spec "$SPEC" #\
+                    #--reporter mochawesome \
+                    #--reporter-options reportDir=results,overwrite=false,html=false,json=true                
                 fi
                 COUNT=$((COUNT+1))
               done

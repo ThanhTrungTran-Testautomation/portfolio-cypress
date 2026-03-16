@@ -95,44 +95,7 @@ jobs:
           path: |
             results
             cypress/videos
-            cypress/screenshots
-
-  cypress-parallel-split:
-    needs: build-image
-    runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/thanhtrungtran-testautomation/portfolio-cypress/app:${{ github.sha }}
-    strategy:
-      fail-fast: false
-      matrix:
-        machine: [0,1,2,3]
-
-    steps:
-    - uses: actions/checkout@v6  
-
-    - name: Start App      
-      run: |        
-        npm ci
-        npm install cypress-split --save-dev
-        npm i -D cypress-split        
-                
-        npm start &   # App im Hintergrund
-        npx wait-on http://localhost:3000    
-    
-    - name: Debug env
-      run: |
-        echo "machine=${{ matrix.machine }}"
-    
-    - name: Debug specs
-      run: ls -R cypress
-
-    - name: Run Cypress tests
-      run: |
-          npx cypress run \
-          --browser chrome \
-          --headless \
-          --env SPLIT=true,SPLIT_INDEX=${{ matrix.machine }},splitTotal=4 \
-          --spec "cypress/e2e/*.cy.js"
+            cypress/screenshots  
     
   cypress-queue-create:
     runs-on: ubuntu-latest
@@ -373,43 +336,8 @@ jobs:
           npx cypress run --spec "cypress/e2e/Login_test.cy.js,cypress/e2e/Dashboard_test.cy.js"
         elif [ "${{ matrix.machine }}" = "1" ]; then
           npx cypress run --spec "cypress/e2e/Form_test.cy.js,cypress/e2e/Utils_test.cy.js"        
-        fi        
-
-  cypress-parallel-with-github-actions:
-    needs: build-image
-    runs-on: ubuntu-24.04
-    container:
-      image: ghcr.io/thanhtrungtran-testautomation/portfolio-cypress/app:${{ github.sha }}
-    strategy:
-      fail-fast: false
-      matrix:
-        containers: [0,1,2,3]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-            
-      - name: Install dependencies
-        run: |
-          npm ci
-          npm install cypress-split --save-dev  
-          npm install
-      
-      - name: Start demo app
-        run: |
-          npm start &
-          npx wait-on http://localhost:3000
-      
-      - name: Run split Cypress E2E tests        
-        uses: cypress-io/github-action@v6 
-        
-        env:
-          SPEC: 'cypress/e2e/*.cy.js'
-          SPLIT: 'true'    
-          SPLIT_INDEX: ${{ strategy.job-index }}
-          splitTotal: 4
-          DEBUG: 'cypress-split'
-
-  # ------------------------------------------------
+        fi          
+# ------------------------------------------------
 # CYPRESS TEST IN KUBERNETES
 # ------------------------------------------------
   cypress-kubernetes-cluster:
@@ -463,14 +391,22 @@ jobs:
       #- name: Test cluster connection
       #  run: KUBECONFIG=$PWD/kubeconfig kubectl get nodes
 
-      - name: Run Cypress job in cluster
-        run: |          
-          kubectl apply -f k8s/cypress-github-job.yml
+      - name: Run Cypress job in cluster      
+        run: |
+          sed "s|IMAGE_TAG|${{ github.sha }}|g" k8s/cypress-github-job.yml | kubectl apply -f -
 
       - name: Debug cluster
         run: |
           kubectl get jobs -A
+          kubectl get pods -n cypress-e2e
           kubectl get pods -A
+
+      - name: Debug jobs
+        run: kubectl get jobs -n cypress-e2e
+
+      - name: Describe pod
+        run: |
+          kubectl describe pod -n cypress-e2e
 
       - name: Wait for Job
         run: |
