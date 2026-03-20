@@ -8,7 +8,12 @@ on:
     branches:
       - main
 env:
-  IMAGE_NAME: ghcr.io/thanhtrungtran-testautomation/portfolio-cypress/app  
+  IMAGE_NAME: ghcr.io/thanhtrungtran-testautomation/portfolio-cypress/app
+  
+permissions: 
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   # -----------------------------
@@ -263,40 +268,19 @@ jobs:
       - name: Install report tools
         run: |
           npm install mochawesome mochawesome-merge mochawesome-report-generator
+          npm install
 
-      - name: Merge reports
+      - name: Merge reports and generate HTML
         run: |
-          node node_modules/mochawesome-merge/bin/mochawesome-merge.js reports/**/results/*.json > merged-report.json
-
-      - name: Generate HTML report
-        run: |
-          node node_modules/mochawesome-report-generator/bin/marge.js merged-report.json \
-          --reportDir final-report \
-          --reportFilename index \
-          --inline
+          npm install mochawesome mochawesome-merge mochawesome-report-generator
+          npx mochawesome-merge reports/**/*.json > merged-report.json
+          npx mochawesome-report-generator merged-report.json --reportDir site --reportFilename index --inline
 
       - name: Upload final report
         uses: actions/upload-artifact@v4
         with:
           name: final-report
           path: final-report
-
-# ------------------------------------------------
-# DEPLOY REPORT TO GITHUB PAGES
-# ------------------------------------------------
-  deploy-report:
-    needs: merge-reports
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-
-    steps:
-      - name: Download final report
-        uses: actions/download-artifact@v4
-        with:
-          name: final-report
-          path: site
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
