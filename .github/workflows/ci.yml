@@ -251,8 +251,10 @@ jobs:
     - name: Merge reports and generate HTML
       run: |
         npm install --save-dev mochawesome mochawesome-merge mochawesome-report-generator
-        ./node_modules/.bin/mochawesome-merge reports/**/*.json > merged-report.json
-        ./node_modules/.bin/mochawesome-report-generator merged-report.json --reportDir site --reportFilename index --inline
+        echo "=== DEBUG REPORT FILES ==="
+        find . -name "*.json"
+        npx mochawesome-merge reports/**/results/*.json > merged-report.json
+        npx mochawesome-report-generator merged-report.json --reportDir site --reportFilename index --inline
 
     - name: Upload final report
       uses: actions/upload-artifact@v4
@@ -392,9 +394,9 @@ jobs:
       - name: Merge reports and generate HTML
         run: |
           npm install --save-dev mochawesome mochawesome-merge mochawesome-report-generator
-          ./node_modules/.bin/mochawesome-merge reports/**/*.json > merged-report.json
-          ./node_modules/.bin/mochawesome-report-generator merged-report.json --reportDir site --reportFilename index --inline
-
+          npx mochawesome-merge reports/**/results/*.json > merged-report.json
+          npx mochawesome-report-generator merged-report.json --reportDir site --reportFilename index --inline
+          
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
