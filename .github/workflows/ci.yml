@@ -420,48 +420,23 @@ jobs:
         run: |
           kubectl logs -n cypress-e2e -l job-name=cypress-run
 
-  # -----------------------------
-# MERGE REPORTS Cypress in Cluster
-# -----------------------------
-  merge-reports-cluster:
-    needs: cypress-kubernetes-cluster
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: reports
-
-      - name: Install report tools
+      - name: Copy reports from pods
         run: |
-          npm install mochawesome mochawesome-merge mochawesome-report-generator
+          mkdir -p reports
+          for POD in $(kubectl get pod -n cypress-e2e -l job-name=cypress-run -o jsonpath="{.items[*].metadata.name}"); do
+            kubectl cp cypress-e2e/$POD:/app/results ./reports/$POD || true
+          done
 
       - name: Merge reports
         run: |
-          npx mochawesome-merge reports/**/*.json > report.json
-      - name: Generate HTML
-        run: |
-          npx mochawesome-report-generator report.json \
-            --reportDir site \
-            --reportFilename index \
-            --inline
+          npm install mochawesome mochawesome-merge mochawesome-report-generator
+          npx mochawesome-merge reports/**/*.json > merged-report.json
+          npx mochawesome-report-generator merged-report.json --reportDir site --reportFilename index --inline
 
-      - uses: actions/upload-pages-artifact@v3
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
           path: site
 
-  # -----------------------------
-# DEPLOY REPORT TO GITHUB PAGES
-# -----------------------------
-  deploy-report-cluster:
-    needs: merge-reports-cluster
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-
-    steps:
-      - uses: actions/deploy-pages@v4
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
