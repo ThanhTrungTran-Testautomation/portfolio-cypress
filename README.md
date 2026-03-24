@@ -25,7 +25,7 @@ Dieses Projekt steht unter einer benutzerdefinierten Lizenz.
 
 Weitere Details finden Sie in der Datei LICENSE.
 
-Die Nutzung ist ausschließlich zu Lern- und Demonstrationszwecken erlaubt.
+Die Nutzung ist ausschließlich zu Demonstrationszwecken erlaubt.
 
 ## Autor
 M.Sc. Thanh-Trung Tran
